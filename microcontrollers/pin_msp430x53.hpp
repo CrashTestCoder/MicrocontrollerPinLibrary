@@ -7,7 +7,7 @@
 
 
 
-#include "out_pin.hpp"
-#include "input_pin.hpp"
+#include "../headers/output_pin.hpp"
+#include "../headers/input_pin.hpp"
 
 #endif /* _MSP430_X53_PIN_LIB_H_P_P_ */
