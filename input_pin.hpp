@@ -15,7 +15,7 @@ class input_pin : public pin_base
 
 };
 
-templat<char pin>
+template<char pin>
 input_pin(pin) -> input_pin<no_bias>(pin);    // default to no_bias
 
 #endif /* _READ_PIN_H_P_P_ */
