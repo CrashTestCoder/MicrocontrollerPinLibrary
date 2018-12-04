@@ -1,6 +1,8 @@
 #ifndef _READ_PIN_H_P_P_
 #define _READ_PIN_H_P_P_
 
+#include "pin_base.hpp"
+
 constexpr enum class InputMode {
   pullup,
   pulldown,
