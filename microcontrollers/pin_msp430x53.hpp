@@ -19,7 +19,7 @@ constexpr const std::vector<bool> analog_write_capable
 
 constexpr std::vector<bool> pin_available
 {{
-	0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0
+	0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,0
 }};
 
 #include "../headers/output_pin.hpp"
