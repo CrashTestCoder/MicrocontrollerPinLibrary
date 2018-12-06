@@ -13,21 +13,32 @@ typedef unsigned char uint8_t; //#include <cstdint> // doesnt seem to exist for 
 //extern const auto analog_write_capable;
 //extern auto pin_available;
 
+template<unsigned PIN_NUM>
+class make_pin_base
+{
+private:
+	friend class pin_base;
+	unsigned pin_num = PIN_NUM;
+public:
+	constexpr make_pin_base() noexcept
+	{
+		static_assert(PIN_NUM < pin_available.size(), "Invalad Pin Number");
+		static_assert(pin_available[PIN_NUM], "Pin is already in use or is not a valid pin");
+	}
+};
+
 class pin_base
 {
 protected:
 	unsigned pin_num;
 public:
-	pin_base() = default;
-	template<unsigned _pin_num> constexpr pin_base() noexcept :
-		pin_num{_pin_num}
-	{
-		static_assert(_pin_num < pin_available.size(), "Pin index out of range");
-		static_assert(pin_available[_pin_num], "Pin is already in use or is not useable for some other reason");
-		pin_available[_pin_num] = false;
-	}
-	
+	//constexpr pin_base(const unsigned& _pin_num) noexcept;
 	pin_base(const pin_base&) = delete; // A disaster waiting to happen
+	template<unsigned PIN_NUM> constexpr pin_base(make_pin_base<PIN_NUM>&& pin) noexcept :
+		pin_num { pin.pin_num }
+	{
+
+	}
 
 	~pin_base() noexcept;
 };
