@@ -1,26 +1,56 @@
 #ifndef _PIN_H_P_P_
 #define _PIN_H_P_P_
 
-enum class uint8_t : unsigned char {} //#include <cstdint> // doesnt seem to exist for some reason...
+#include <array>
+#include <type_traits>
 
-// Note: dispite what it sounds like, constexpr does not mean that the variables value is constant
+#ifdef MSP430_x53
+#include "../microcontrollers/pin_msp430x53.hpp"
+#else // elif for other supported microcontroller libraries
+static_assert(false, "No microcontroller specified");
+#endif
 
-// Microcontroller data defined in the microcontroller specific file
-extern constexpr const std::vector<bool> analog_read_capable;
-extern constexpr const std::vector<bool> analog_write_capable;
-extern constexpr std::vector<bool> pin_available;
+template<unsigned PIN_NUM>
+struct make_pin_base
+{
+	unsigned const pin_num = PIN_NUM;
+	constexpr make_pin_base() noexcept
+	{
+		static_assert(PIN_NUM < pin_available.size(), "Invalad Pin Number");
+		static_assert(pin_available[PIN_NUM], "Pin is already in use or is not a valid pin");
+		const_cast<bool&>(pin_available[PIN_NUM]) = false; // Why must this be necissary?!?!
+	}
+};
 
 class pin_base
 {
-	std::byte pin_num;
-public:
-	constexpr virtual pin_base(const uint8_t& _pin_num) noexcept;	// pretty sure constexpr virtual cant happen for some reason...
-																	// sticking with it anyway until it gives me an error,
-																	// prioritize constexpr if possible
-	pin_base(const pin_base&) = delete; // A disaster waiting to happen
-	constexpr virtual pin_base(pin_base&&) noexcept = 0;
+protected:
+	unsigned pin_num = -1;
+	constexpr pin_base(unsigned const& _pin_num) noexcept :
+		pin_num{ _pin_num }
+	{
 
-	constexpr virtual ~pin_base() noexcept;
+	}
+public:
+	constexpr pin_base() noexcept {}
+	pin_base(pin_base const&) = delete; // A disaster waiting to happen
+	template<unsigned PIN_NUM> constexpr pin_base(make_pin_base<PIN_NUM>&& pin) noexcept :
+		pin_num { pin.pin_num }
+	{
+
+	}
+
+	~pin_base() noexcept
+	{
+		if (pin_num != (unsigned)-1)
+		{
+			const_cast<bool&>(pin_available[pin_num]) = true;
+
+			// TODO: impliment whatever needs to be done to stop using a pin
+
+		}
+	}
 };
+
 
 #endif /* _PIN_H_P_P_ */

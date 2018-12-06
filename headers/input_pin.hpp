@@ -1,85 +1,90 @@
 #ifndef _READ_PIN_H_P_P_
 #define _READ_PIN_H_P_P_
 
-#include<vector>
-#include<string>
-#include<type_traits>
+#include <vector>
+#include <string>
+#include <type_traits>
 
 #include "pin_base.hpp"
 
 typedef enum InputMode {
-	analog,
 	pullup,
 	pulldown,
 	no_bias
 } im;
 
-template<InputMode IM, typename = std::enable_if_t<IM <= no_bias>::value>
-class input_pin : public pin_base
-{
-public:
-	constexpr input_pin(const uint8_t&) noexcept; // may not be able to be constexpr, depends on backend
-	constexpr input_pin(input_pin&&) noexcept; // may not be able to be constexpr, depends on backend
+/**************************************************************************/
+/*                            Helper Classes                              */
+/**************************************************************************/
 
-	double analog_read() const noexcept;	// [0,1]
-	bool digital_read() const noexcept;
+template<unsigned PIN_NUM, InputMode IM> struct make_input_pin : public make_pin_base<PIN_NUM>
+{
+	constexpr make_input_pin() noexcept;
+};
+
+template<unsigned PIN_NUM> struct make_input_pin<PIN_NUM, pullup> : public make_pin_base<PIN_NUM>
+{
+	constexpr make_input_pin() noexcept :
+		make_pin_base<PIN_NUM>()
+	{
+		// TODO: Initialize input pin with pullup resistor
+	}
+};
+
+template<unsigned PIN_NUM> struct make_input_pin<PIN_NUM, pulldown> : public make_pin_base<PIN_NUM>
+{
+	constexpr make_input_pin() noexcept :
+		make_pin_base<PIN_NUM>()
+	{
+		// TODO: Initialize input pin with pulldown resistor
+	}
+};
+
+template<unsigned PIN_NUM> struct make_input_pin<PIN_NUM, no_bias> : public make_pin_base<PIN_NUM>
+{
+	constexpr make_input_pin() noexcept :
+		make_pin_base<PIN_NUM>()
+	{
+		// TODO: Initialize input pin without a bias resistor
+	}
 };
 
 
-/**************************************************************************/
-/*                   Constructors / Initializers                          */
-/**************************************************************************/
-
-template<char pin>
-input_pin(pin) -> input_pin<no_bias>(pin);    // default to no_bias
-
-template<> constexpr input_pin<pullup>::input_pin(const uint8_t& _pin_num) noexcept :
-	pin_base(_pin_num)
-{
-	// TODO: Initialize pin with pullup resistor
-}
-
-template<> constexpr input_pin<pulldown>::input_pin(const uint8_t& _pin_num) noexcept :
-	pin_base(_pin_num)
-{
-	// TODO: Initialize pin with pulldown resistor
-}
-
-template<> constexpr input_pin<no_bias>::input_pin(const uint8_t& _pin_num) noexcept :
-	pin_base(_pin_num)
-{
-	// TODO: Initialize pin without bias resistor
-}
-
-template<InputMode IM> constexpr input_pin<IM>::input_pin(input_pin<IM>&& pin) noexcept
-{
-	pin_num = pin.pin_num;
-
-	// TODO: Fully disable parameter pin and move all of its data to this pin
-	// Will probably require more explaination as to what this is for...
-}
-
-
 
 /**************************************************************************/
-/*                            Member Functions                            */
+/*                            Class Definition                            */
 /**************************************************************************/
 
-template<InputMode IM> double input_pin<IM>::analog_read() const noexcept
+class input_pin : public pin_base
 {
-	static_assert(analog_read_capable[pin], "Pin "s + pin + " is not capable of reading analog values"s);
+public:
+	constexpr input_pin(input_pin&& pin) noexcept // may not be able to be constexpr, depends on backend
+	{
+		pin_num = pin.pin_num;
 
-	// TODO: Read value from non-analog pin
-	// Can be divided into more specific operations if necisary
-	return 0;
-}
+		// TODO: Whatever needs to happen to change ownership of the pin, probably nothing
+	}
 
-template<InputMode IM> bool input_pin<IM>::digital_read() const noexcept
-{
-	// TODO: Read value from non-analog pin
-	// Can be divided into more specific operations if necisary
-	return false;
-}
+	template<unsigned PIN_NUM, InputMode IM> constexpr input_pin(make_input_pin<PIN_NUM, IM>&& pin_init) noexcept // may not be able to be constexpr, depends on backend
+	{
+		pin_num = pin_init.pin_num;
 
+		// TODO: Whatever needs to happen to change ownership of the initialized pin, probably nothing
+	}
+
+	double analog_read() const noexcept	// [0,1]
+	{
+		// TODO: Read value from non-analog pin
+		// Can be divided into more specific operations if necisary
+		return 0;
+	}
+
+	bool digital_read() const noexcept
+	{
+		// TODO: Read value from non-analog pin
+		// Can be divided into more specific operations if necisary
+		return false;
+	}
+};
 
 #endif /* _READ_PIN_H_P_P_ */
