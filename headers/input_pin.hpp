@@ -1,9 +1,9 @@
 #ifndef _READ_PIN_H_P_P_
 #define _READ_PIN_H_P_P_
 
-#include<vector>
-#include<string>
-#include<type_traits>
+#include <vector>
+#include <string>
+#include <type_traits>
 
 #include "pin_base.hpp"
 
@@ -14,11 +14,11 @@ typedef enum InputMode {
 	no_bias
 } im;
 
-template<InputMode IM, typename = std::enable_if_t<IM <= no_bias>::value>
 class input_pin : public pin_base
 {
 public:
-	constexpr input_pin(const uint8_t&) noexcept; // may not be able to be constexpr, depends on backend
+	template<InputMode IM, typename = std::enable_if_t<IM <= no_bias>>
+	constexpr input_pin(const unsigned&) noexcept; // may not be able to be constexpr, depends on backend
 	constexpr input_pin(input_pin&&) noexcept; // may not be able to be constexpr, depends on backend
 
 	double analog_read() const noexcept;	// [0,1]
@@ -30,28 +30,27 @@ public:
 /*                   Constructors / Initializers                          */
 /**************************************************************************/
 
-template<char pin>
-input_pin(pin) -> input_pin<no_bias>(pin);    // default to no_bias
+input_pin(const uint8_t&) -> input_pin<im::no_bias>;    // default to no_bias
 
-template<> constexpr input_pin<pullup>::input_pin(const uint8_t& _pin_num) noexcept :
-	pin_base(_pin_num)
+template<> constexpr input_pin::input_pin<pullup>(const unsigned& _pin_num) noexcept :
+	pin_base<_pin_num>()
 {
 	// TODO: Initialize pin with pullup resistor
 }
 
-template<> constexpr input_pin<pulldown>::input_pin(const uint8_t& _pin_num) noexcept :
+template<> constexpr input_pin::input_pin<pulldown>(const unsigned& _pin_num) noexcept :
 	pin_base(_pin_num)
 {
 	// TODO: Initialize pin with pulldown resistor
 }
 
-template<> constexpr input_pin<no_bias>::input_pin(const uint8_t& _pin_num) noexcept :
+template<> constexpr input_pin::input_pin<no_bias>(const unsigned& _pin_num) noexcept :
 	pin_base(_pin_num)
 {
 	// TODO: Initialize pin without bias resistor
 }
 
-template<InputMode IM> constexpr input_pin<IM>::input_pin(input_pin<IM>&& pin) noexcept
+constexpr input_pin::input_pin(input_pin&& pin) noexcept
 {
 	pin_num = pin.pin_num;
 
