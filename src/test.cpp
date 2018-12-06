@@ -8,5 +8,6 @@ using namespace std;
 
 int main()
 {
-	output_pin p1 = make_output_pin<5>();
+	auto p1 = make_output_pin<5>();
+	auto p2 = make_input_pin<6, pullup>();
 }

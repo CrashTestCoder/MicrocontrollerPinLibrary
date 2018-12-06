@@ -18,6 +18,7 @@ struct make_pin_base
 	{
 		static_assert(PIN_NUM < pin_available.size(), "Invalad Pin Number");
 		static_assert(pin_available[PIN_NUM], "Pin is already in use or is not a valid pin");
+		const_cast<bool&>(pin_available[PIN_NUM]) = false; // Why must this be necissary?!?!
 	}
 };
 
@@ -43,7 +44,7 @@ public:
 	{
 		if (pin_num != (unsigned)-1)
 		{
-			pin_available[pin_num] = true;
+			const_cast<bool&>(pin_available[pin_num]) = true;
 
 			// TODO: impliment whatever needs to be done to stop using a pin
 

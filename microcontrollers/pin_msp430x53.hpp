@@ -19,7 +19,7 @@ constexpr const std::array<bool,20> analog_write_capable
 	0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0
 }};
 
-inline std::array<bool,20> pin_available
+constexpr std::array<bool,20> pin_available
 {{
 	0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,0
 }};
