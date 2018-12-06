@@ -4,22 +4,16 @@
 #include <array>
 #include <type_traits>
 
-typedef unsigned char uint8_t; //#include <cstdint> // doesnt seem to exist for some reason...
-
-// Note: dispite what it sounds like, constexpr does not mean that the variables value is constant
-
-// Microcontroller data defined in the microcontroller specific file
-//extern const auto analog_read_capable;
-//extern const auto analog_write_capable;
-//extern auto pin_available;
+#ifdef MSP430_x53
+#include "../microcontrollers/pin_msp430x53.hpp"
+#else // elif for other supported microcontroller libraries
+static_assert(false, "No microcontroller specified");
+#endif
 
 template<unsigned PIN_NUM>
-class make_pin_base
+struct make_pin_base
 {
-private:
-	friend class pin_base;
-	unsigned pin_num = PIN_NUM;
-public:
+	unsigned const pin_num = PIN_NUM;
 	constexpr make_pin_base() noexcept
 	{
 		static_assert(PIN_NUM < pin_available.size(), "Invalad Pin Number");
@@ -30,17 +24,31 @@ public:
 class pin_base
 {
 protected:
-	unsigned pin_num;
+	unsigned pin_num = -1;
+	constexpr pin_base(unsigned const& _pin_num) noexcept :
+		pin_num{ _pin_num }
+	{
+
+	}
 public:
-	//constexpr pin_base(const unsigned& _pin_num) noexcept;
-	pin_base(const pin_base&) = delete; // A disaster waiting to happen
+	constexpr pin_base() noexcept {}
+	pin_base(pin_base const&) = delete; // A disaster waiting to happen
 	template<unsigned PIN_NUM> constexpr pin_base(make_pin_base<PIN_NUM>&& pin) noexcept :
 		pin_num { pin.pin_num }
 	{
 
 	}
 
-	~pin_base() noexcept;
+	~pin_base() noexcept
+	{
+		if (pin_num != (unsigned)-1)
+		{
+			pin_available[pin_num] = true;
+
+			// TODO: impliment whatever needs to be done to stop using a pin
+
+		}
+	}
 };
 
 
