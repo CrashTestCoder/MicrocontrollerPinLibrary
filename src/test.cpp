@@ -1,4 +1,3 @@
-#pragma once
 #define MSP430_x53
 #include "../headers/pinlib.hpp"
 
