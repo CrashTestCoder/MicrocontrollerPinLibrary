@@ -9,7 +9,7 @@ using namespace std;
 int main()
 {
 	output_pin p1 = make_output_pin<5>();
-	output_pin p3 = make_output_pin<5>();
+	output_pin p3 = make_output_pin<5>();	// Should cause compiler error, but doesn't
 	input_pin p2 = make_input_pin<6>(pullup);
 
 	//auto p4{ std::move(p3) };
