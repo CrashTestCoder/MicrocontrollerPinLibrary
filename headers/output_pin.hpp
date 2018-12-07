@@ -5,15 +5,13 @@
 
 // let me know if there needs to be a hard divide between pwm and digital
 
-template<unsigned PIN_NUM>
-struct make_output_pin : public make_pin_base<PIN_NUM>
+class output_pin;
+template<unsigned PIN_NUM> constexpr output_pin&& make_output_pin() noexcept
 {
-	constexpr make_output_pin() noexcept :
-		make_pin_base<PIN_NUM>()
-	{
-		// TODO: Initialize output_pin
-	}
-};
+	// TODO: Initialize output_pin
+
+	return static_cast<output_pin&&>(make_pin_base<PIN_NUM>());
+}
 
 class output_pin : public pin_base
 {
@@ -21,14 +19,10 @@ public:
 	constexpr output_pin(output_pin&& pin) noexcept
 	{
 		pin_num = pin.pin_num;
+		pin.pin_num = -1;
 
 		// TODO: Fully disable parameter pin and move all of its data to this pin
 		// Will probably require more explaination as to what this is for...
-	}
-
-	template<unsigned PIN_NUM> constexpr output_pin(make_output_pin<PIN_NUM>&& pin_init) noexcept 		
-	{
-		pin_num = pin_init.pin_num;
 	}
 
 	void digital_write(const bool& value) noexcept

@@ -13,42 +13,6 @@ typedef enum InputMode {
 	no_bias
 } im;
 
-/**************************************************************************/
-/*                            Helper Classes                              */
-/**************************************************************************/
-
-template<unsigned PIN_NUM, InputMode IM> struct make_input_pin : public make_pin_base<PIN_NUM>
-{
-	constexpr make_input_pin() noexcept;
-};
-
-template<unsigned PIN_NUM> struct make_input_pin<PIN_NUM, pullup> : public make_pin_base<PIN_NUM>
-{
-	constexpr make_input_pin() noexcept :
-		make_pin_base<PIN_NUM>()
-	{
-		// TODO: Initialize input pin with pullup resistor
-	}
-};
-
-template<unsigned PIN_NUM> struct make_input_pin<PIN_NUM, pulldown> : public make_pin_base<PIN_NUM>
-{
-	constexpr make_input_pin() noexcept :
-		make_pin_base<PIN_NUM>()
-	{
-		// TODO: Initialize input pin with pulldown resistor
-	}
-};
-
-template<unsigned PIN_NUM> struct make_input_pin<PIN_NUM, no_bias> : public make_pin_base<PIN_NUM>
-{
-	constexpr make_input_pin() noexcept :
-		make_pin_base<PIN_NUM>()
-	{
-		// TODO: Initialize input pin without a bias resistor
-	}
-};
-
 
 
 /**************************************************************************/
@@ -62,14 +26,7 @@ public:
 	{
 		pin_num = pin.pin_num;
 
-		// TODO: Whatever needs to happen to change ownership of the pin, probably nothing
-	}
-
-	template<unsigned PIN_NUM, InputMode IM> constexpr input_pin(make_input_pin<PIN_NUM, IM>&& pin_init) noexcept // may not be able to be constexpr, depends on backend
-	{
-		pin_num = pin_init.pin_num;
-
-		// TODO: Whatever needs to happen to change ownership of the initialized pin, probably nothing
+		// TODO: Whatever needs to happen to change ownership of the pin, probably nothing, remove this comment if so
 	}
 
 	double analog_read() const noexcept	// [0,1]
@@ -86,5 +43,30 @@ public:
 		return false;
 	}
 };
+
+/**************************************************************************/
+/*                           Helper Functions                             */
+/**************************************************************************/
+
+template<unsigned PIN_NUM> constexpr input_pin&& make_input_pin(InputMode in_mode = no_bias) noexcept
+{
+	switch (in_mode)
+	{
+	case pullup:
+		// TODO: Initialize input pin with pullup resistor
+		break;
+	case pulldown:
+		// TODO: Initialize input pin with pulldown resistor
+		break;
+	case no_bias:
+		// TODO: Initialize input pin without a bias resistor
+		break;
+	default:;	// Invalid Mode
+#pragma message("Invalid Input Mode")
+//#warning Invalid Input Mode
+	}
+
+	return static_cast<input_pin&&>(make_pin_base<PIN_NUM>());
+}
 
 #endif /* _READ_PIN_H_P_P_ */

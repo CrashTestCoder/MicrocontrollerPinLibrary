@@ -10,22 +10,14 @@
 static_assert(false, "No microcontroller specified");
 #endif
 
-template<unsigned PIN_NUM>
-struct make_pin_base
-{
-	unsigned const pin_num = PIN_NUM;
-	constexpr make_pin_base() noexcept
-	{
-		static_assert(PIN_NUM < pin_available.size(), "Invalad Pin Number");
-		static_assert(pin_available[PIN_NUM], "Pin is already in use or is not a valid pin");
-		const_cast<bool&>(pin_available[PIN_NUM]) = false; // Why must this be necissary?!?!
-	}
-};
+class pin_base;
+template<unsigned PIN_NUM> constexpr pin_base&& make_pin_base() noexcept;
 
 class pin_base
 {
 protected:
 	unsigned pin_num = -1;
+	template<unsigned PIN_NUM> friend constexpr pin_base&& make_pin_base() noexcept;
 	constexpr pin_base(unsigned const& _pin_num) noexcept :
 		pin_num{ _pin_num }
 	{
@@ -34,17 +26,17 @@ protected:
 public:
 	constexpr pin_base() noexcept {}
 	pin_base(pin_base const&) = delete; // A disaster waiting to happen
-	template<unsigned PIN_NUM> constexpr pin_base(make_pin_base<PIN_NUM>&& pin) noexcept :
-		pin_num { pin.pin_num }
+	constexpr pin_base(pin_base&& pin) noexcept
 	{
-
+		pin_num = pin.pin_num;
+		pin.pin_num = -1;
 	}
 
 	~pin_base() noexcept
 	{
 		if (pin_num != (unsigned)-1)
 		{
-			const_cast<bool&>(pin_available[pin_num]) = true;
+			const_cast<bool&>(pin_available[pin_num - 1]) = true;
 
 			// TODO: impliment whatever needs to be done to stop using a pin
 
@@ -52,5 +44,12 @@ public:
 	}
 };
 
+template<unsigned PIN_NUM> constexpr pin_base&& make_pin_base() noexcept
+{
+	//static_assert(PIN_NUM - 1 < pin_available.size(), "Invalad Pin Number");
+	static_assert(pin_available[PIN_NUM - 1], "Pin is already in use or is not a valid pin");
+	const_cast<bool&>(pin_available[PIN_NUM - 1]) = false;
+	return std::move(pin_base(PIN_NUM));
+}
 
 #endif /* _PIN_H_P_P_ */
